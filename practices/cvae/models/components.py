@@ -12,9 +12,7 @@ class Encoder(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Linear(img_dim[0] * img_dim[1] *
-                      img_dim[2] + num_classes, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
+                      img_dim[2] + num_classes, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
@@ -54,9 +52,7 @@ class Decoder(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, img_dim[0] * img_dim[1] * img_dim[2]),
+            nn.Linear(512, img_dim[0] * img_dim[1] * img_dim[2]),
             nn.Sigmoid(),
             nn.Unflatten(1, self.img_dim)
         )

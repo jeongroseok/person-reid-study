@@ -39,7 +39,7 @@ def main(args=None):
                          val_transforms=transforms,
                          test_transforms=transforms)
 
-    model = VAE(latent_dim=4)
+    model = VAE(latent_dim=2)
 
     callbacks = [
         TensorboardGenerativeModelImageSampler(10),
