@@ -1,54 +1,37 @@
 import pytorch_lightning as pl
-
-from torch.utils.data import Dataset, DataLoader
-from pl_examples import _DATASETS_PATH
-from torchvision import transforms as transform_lib
-from pl_bolts.datamodules import MNISTDataModule
-from pl_bolts.datamodules.vision_datamodule import VisionDataModule
+import torchvision.transforms
 from pl_bolts.callbacks import TensorboardGenerativeModelImageSampler
-from callbacks import LatentDimInterpolator, CVAEImageSampler
-from models.vae import VAE
+from pl_bolts.datamodules import MNISTDataModule
+from pl_examples import _DATASETS_PATH
 
-def set_persistent_workers(data_module: VisionDataModule):
-    def _data_loader(self: VisionDataModule,
-                     dataset: Dataset,
-                     shuffle: bool = False) -> DataLoader:
-        return DataLoader(
-            dataset,
-            batch_size=self.batch_size,
-            shuffle=shuffle,
-            num_workers=self.num_workers,
-            drop_last=self.drop_last,
-            pin_memory=self.pin_memory,
-            persistent_workers=True
-        )
-    data_module._data_loader = _data_loader
+from callbacks import CVAEImageSampler, LatentDimInterpolator
+from models.cvae import CVAE
+from utils import set_persistent_workers
 
 
 def main(args=None):
-
     set_persistent_workers(MNISTDataModule)
 
-    transforms = transform_lib.Compose([
-        transform_lib.ToTensor(),
-        transform_lib.Normalize((0.5, ), (0.5, )),
+    transforms = torchvision.transforms.Compose([
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize((0.5, ), (0.5, )),
     ])
-    dm = MNISTDataModule(_DATASETS_PATH, num_workers=2,
+    dm = MNISTDataModule(_DATASETS_PATH, num_workers=4,
                          batch_size=128, shuffle=True, drop_last=True,
                          train_transforms=transforms,
                          val_transforms=transforms,
                          test_transforms=transforms)
 
-    model = VAE(latent_dim=2)
+    model = CVAE(latent_dim=16, batch_norm=True, lr=2e-3)
 
     callbacks = [
         TensorboardGenerativeModelImageSampler(10),
-        LatentDimInterpolator(),
+        # LatentDimInterpolator(),
         CVAEImageSampler()
     ]
     trainer = pl.Trainer(
-        progress_bar_refresh_rate=10,
-        max_epochs=1000,
+        progress_bar_refresh_rate=5,
+        max_epochs=1500,
         gpus=-1,
         callbacks=callbacks
     )

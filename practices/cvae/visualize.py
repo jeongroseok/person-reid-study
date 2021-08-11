@@ -1,12 +1,12 @@
 import torch
 
 from matplotlib import pyplot as plt
-from models.vae import VAE
+from models.cvae import CVAE
 from torchvision.utils import make_grid
 
 
 def main(args=None):
-    model: VAE = VAE.load_from_checkpoint(
+    model: CVAE = CVAE.load_from_checkpoint(
         'lightning_logs\\version_0\\checkpoints\\epoch=149-step=56249.ckpt')
     imgs = []
     for c in range(10):
